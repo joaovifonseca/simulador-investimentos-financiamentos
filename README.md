@@ -2,6 +2,8 @@
 
 > Simulador estático para testar e demonstrar cálculos e interfaces de financiamentos e investimentos.
 
+**Site publicado:** https://joaovifonseca.github.io/simulador-investimentos-financiamentos/
+
 ## Descrição
 
 Este diretório contém uma versão estática do simulador que permite:
