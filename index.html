@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simuladores Financeiros</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="page.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Planejamento financeiro</p>
+        <h1>Simuladores financeiros</h1>
+      </div>
+      <a class="source-link" href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noreferrer">Tabela IR 2026</a>
+    </header>
+
+    <nav class="tabs" aria-label="Simuladores">
+      <button class="tab-button active" id="tab-investments" type="button" data-tab="investments">Investimentos</button>
+      <button class="tab-button" id="tab-mortgage" type="button" data-tab="mortgage">Financiamento</button>
+      <button class="tab-button" id="tab-amortization" type="button" data-tab="amortization">Amortizacao</button>
+    </nav>
+
+    <section id="investments" class="tab-view active" aria-labelledby="tab-investments">
+      <form class="calculator" id="investment-form">
+        <div class="form-panel">
+          <div class="section-title">
+            <h2>Investimento</h2>
+            <p>Informe o prazo para aplicar IR e IOF automaticamente.</p>
+          </div>
+
+          <div class="field-grid">
+            <label>
+              Valor inicial
+              <span class="money-input"><span>R$</span><input type="number" id="initialAmount" min="0" step="100" inputmode="decimal" placeholder="Ex: 10000" value="10000"></span>
+              <span class="field-hint">Use reais sem pontos ou simbolos. Ex: 10000 para R$ 10 mil.</span>
+            </label>
+            <label>
+              Aporte mensal
+              <span class="money-input"><span>R$</span><input type="number" id="monthlyContribution" min="0" step="50" inputmode="decimal" placeholder="Ex: 500" value="500"></span>
+              <span class="field-hint">Valor aplicado todo mes. Use 0 se nao houver aporte.</span>
+            </label>
+            <label>
+              Rentabilidade anual (%)
+              <input type="number" id="annualReturn" step="0.01" inputmode="decimal" placeholder="Ex: 11.25" value="11.25">
+              <span class="field-hint">Digite percentual ao ano. Ex: 11.25 significa 11,25% a.a.</span>
+            </label>
+            <label>
+              Tipo de aplicacao
+              <select id="investmentType">
+                <option value="taxable">Renda fixa tributavel</option>
+                <option value="exempt">LCI/LCA/CRI/CRA ou poupanca</option>
+              </select>
+              <span class="field-hint">Tributavel aplica IR regressivo; isento nao desconta IR.</span>
+            </label>
+            <label>
+              Prazo
+              <input type="number" id="investmentTerm" min="1" step="1" inputmode="numeric" placeholder="Ex: 24" value="24">
+              <span class="field-hint">Combine com a unidade ao lado. Ex: 24 meses ou 2 anos.</span>
+            </label>
+            <label>
+              Unidade do prazo
+              <select id="investmentTermUnit">
+                <option value="months">Meses</option>
+                <option value="years">Anos</option>
+                <option value="days">Dias</option>
+              </select>
+              <span class="field-hint">O prazo define a aliquota de IR e se existe IOF.</span>
+            </label>
+          </div>
+        </div>
+
+        <aside class="result-panel">
+          <div class="metric primary">
+            <span>Valor liquido final</span>
+            <strong id="investmentNetValue">R$ 0,00</strong>
+          </div>
+          <div class="metric-list">
+            <div><span>Total investido</span><strong id="investmentDeposited">R$ 0,00</strong></div>
+            <div><span>Rendimento bruto</span><strong id="investmentGrossProfit">R$ 0,00</strong></div>
+            <div><span>IR estimado</span><strong id="investmentIncomeTax">R$ 0,00</strong></div>
+            <div><span>IOF estimado</span><strong id="investmentIof">R$ 0,00</strong></div>
+            <div><span>Aliquota aplicada</span><strong id="investmentTaxRate">0%</strong></div>
+          </div>
+        </aside>
+      </form>
+
+      <div class="schedule-panel">
+        <div class="section-title compact">
+          <h2>Evolucao do investimento</h2>
+          <p>Projecao mensal com aportes, rendimento bruto e valor liquido estimado.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mes</th>
+                <th>Total investido</th>
+                <th>Saldo bruto</th>
+                <th>Impostos</th>
+                <th>Saldo liquido</th>
+              </tr>
+            </thead>
+            <tbody id="investmentRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="mortgage" class="tab-view" aria-labelledby="tab-mortgage">
+      <form class="calculator" id="mortgage-form">
+        <div class="form-panel">
+          <div class="section-title">
+            <h2>Financiamento imobiliario</h2>
+            <p>Compare SAC e PRICE sem amortizacoes extras.</p>
+          </div>
+
+          <div class="field-grid">
+            <label>
+              Valor do imovel
+              <div class="range-field">
+                <input type="range" id="propertyValueRange" min="50000" max="3000000" step="10000" value="500000">
+                <span class="money-input"><span>R$</span><input type="number" id="propertyValue" min="0" step="1000" inputmode="decimal" placeholder="Ex: 500000" value="500000"></span>
+              </div>
+              <span class="field-hint">Arraste para ajustar rapido ou digite qualquer valor no campo.</span>
+            </label>
+            <label>
+              Entrada
+              <span class="money-input"><span>R$</span><input type="number" id="downPayment" min="0" step="1000" inputmode="decimal" placeholder="Ex: 100000" value="100000"></span>
+              <span class="field-hint">Parte paga a vista. O financiado sera imovel menos entrada.</span>
+            </label>
+            <label>
+              Juros anual (%)
+              <input type="number" id="mortgageAnnualRate" min="0" step="0.01" inputmode="decimal" placeholder="Ex: 10.5" value="10.5">
+              <span class="field-hint">Taxa efetiva anual aproximada. Ex: 10.5 para 10,5% a.a.</span>
+            </label>
+            <label>
+              Prazo (meses)
+              <input type="number" id="mortgageTerm" min="1" step="1" inputmode="numeric" placeholder="Ex: 360" value="360">
+              <span class="field-hint">360 meses equivalem a 30 anos.</span>
+            </label>
+            <label>
+              Seguro mensal
+              <span class="money-input"><span>R$</span><input type="number" id="monthlyInsurance" min="0" step="10" inputmode="decimal" placeholder="Ex: 180" value="180"></span>
+              <span class="field-hint">Seguro MIP/DFI ou valor aproximado cobrado no boleto.</span>
+            </label>
+            <label>
+              Taxa administrativa mensal
+              <span class="money-input"><span>R$</span><input type="number" id="monthlyAdminFee" min="0" step="5" inputmode="decimal" placeholder="Ex: 25" value="25"></span>
+              <span class="field-hint">Tarifa mensal do contrato. Use 0 se o banco nao cobrar.</span>
+            </label>
+            <label>
+              Taxas iniciais do banco
+              <span class="money-input"><span>R$</span><input type="number" id="upfrontBankFees" min="0" step="100" inputmode="decimal" placeholder="Ex: 3500" value="3500"></span>
+              <span class="field-hint">Avaliacao do imovel, tarifa de contrato ou custos pagos no inicio.</span>
+            </label>
+          </div>
+        </div>
+
+        <aside class="result-panel">
+          <div class="comparison">
+            <article class="comparison-card">
+              <span>SAC</span>
+              <strong id="sacTotal">R$ 0,00</strong>
+              <small id="sacSummary">0 parcelas</small>
+            </article>
+            <article class="comparison-card">
+              <span>PRICE</span>
+              <strong id="priceTotal">R$ 0,00</strong>
+              <small id="priceSummary">0 parcelas</small>
+            </article>
+          </div>
+          <div class="metric-list">
+            <div><span>Valor financiado</span><strong id="financedAmount">R$ 0,00</strong></div>
+            <div><span>Primeira SAC</span><strong id="sacFirstPayment">R$ 0,00</strong></div>
+            <div><span>Parcela PRICE</span><strong id="priceFirstPayment">R$ 0,00</strong></div>
+            <div><span>Encargos mensais</span><strong id="monthlyBankCharges">R$ 0,00</strong></div>
+            <div><span>Taxas iniciais</span><strong id="upfrontFeesResult">R$ 0,00</strong></div>
+          </div>
+        </aside>
+      </form>
+
+      <div class="schedule-panel">
+        <div class="section-title compact">
+          <h2>Primeiras parcelas</h2>
+          <p>Parcelas incluem seguro mensal e tarifa administrativa; saldos nao incluem correcao monetaria.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mes</th>
+                <th>SAC parcela</th>
+                <th>SAC juros</th>
+                <th>SAC saldo</th>
+                <th>PRICE parcela</th>
+                <th>PRICE juros</th>
+                <th>PRICE saldo</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="amortization" class="tab-view" aria-labelledby="tab-amortization">
+      <form class="calculator" id="amortization-form">
+        <div class="form-panel">
+          <div class="section-title">
+            <h2>Amortizacao</h2>
+            <p>Simule antecipacoes escolhendo se quer reduzir prazo ou diminuir parcelas; ao reduzir parcela, a diferenca mensal tambem e projetada como investimento.</p>
+          </div>
+
+          <div class="field-grid">
+            <label>
+              Saldo financiado
+              <span class="money-input"><span>R$</span><input type="number" id="amortizationPrincipal" min="0" step="1000" inputmode="decimal" placeholder="Ex: 400000" value="400000"></span>
+              <span class="field-hint">Use o saldo devedor atual ou o valor financiado inicial.</span>
+            </label>
+            <label>
+              Sistema
+              <select id="amortizationMethod">
+                <option value="sac">SAC</option>
+                <option value="price">PRICE</option>
+              </select>
+              <span class="field-hint">Escolha a tabela do contrato que deseja testar.</span>
+            </label>
+            <label>
+              Juros anual (%)
+              <input type="number" id="amortizationAnnualRate" min="0" step="0.01" inputmode="decimal" placeholder="Ex: 10.5" value="10.5">
+              <span class="field-hint">Taxa anual do financiamento.</span>
+            </label>
+            <label>
+              Prazo restante (meses)
+              <input type="number" id="amortizationTerm" min="1" step="1" inputmode="numeric" placeholder="Ex: 300" value="300">
+              <span class="field-hint">Quantidade de parcelas que ainda faltam pagar.</span>
+            </label>
+            <label>
+              Tipo de amortizacao
+              <select id="amortizationType">
+                <option value="monthly">Mensal recorrente</option>
+                <option value="oneTime">Avulsa unica</option>
+              </select>
+              <span class="field-hint">Escolha se vai amortizar todo mes ou fazer um pagamento unico.</span>
+            </label>
+            <label>
+              Objetivo
+              <select id="amortizationGoal">
+                <option value="term">Reduzir prazo</option>
+                <option value="payment">Reduzir valor da parcela</option>
+              </select>
+              <span class="field-hint">Reduzir prazo costuma diminuir os juros da parcela; reduzir parcela recalcula pelo prazo restante.</span>
+            </label>
+            <label class="amortization-option" data-amortization-group="monthly">
+              Amortizacao extra mensal
+              <span class="money-input"><span>R$</span><input type="number" id="monthlyExtraAmortization" min="0" step="100" inputmode="decimal" placeholder="Ex: 1000" value="1000"></span>
+              <span class="field-hint">Valor adicional pago todo mes para abater o saldo.</span>
+            </label>
+            <label class="amortization-option" data-amortization-group="monthly">
+              Comecar no mes
+              <input type="number" id="extraStartMonth" min="1" step="1" inputmode="numeric" placeholder="Ex: 1" value="1">
+              <span class="field-hint">Mes em que a amortizacao mensal passa a acontecer.</span>
+            </label>
+            <label class="amortization-option hidden" data-amortization-group="oneTime">
+              Amortizacao avulsa
+              <span class="money-input"><span>R$</span><input type="number" id="oneTimeAmortization" min="0" step="100" inputmode="decimal" placeholder="Ex: 20000" value="20000"></span>
+              <span class="field-hint">Pagamento unico para reduzir o saldo. Use 0 se nao houver.</span>
+            </label>
+            <label class="amortization-option hidden" data-amortization-group="oneTime">
+              Mes da amortizacao avulsa
+              <input type="number" id="oneTimeMonth" min="1" step="1" inputmode="numeric" placeholder="Ex: 12" value="12">
+              <span class="field-hint">Mes em que o pagamento unico sera feito.</span>
+            </label>
+            <label class="checkbox-field payment-goal-option hidden">
+              <span>
+                <input type="checkbox" id="investPaymentDifference">
+                Investiria o restante da parcela?
+              </span>
+              <span class="field-hint">Ao reduzir o valor da parcela, simula investir a diferenca mensal.</span>
+            </label>
+            <label class="investment-option payment-goal-option hidden">
+              Taxa de investimento (%)
+              <input type="number" id="amortizationInvestmentRate" min="0" step="0.01" inputmode="decimal" placeholder="Ex: 11.25">
+              <span class="field-hint">Se ficar vazio ou 0, usa a taxa anual do financiamento.</span>
+            </label>
+          </div>
+        </div>
+
+        <aside class="result-panel">
+          <div class="metric primary">
+            <span>Economia estimada</span>
+            <strong id="amortizationSavings">R$ 0,00</strong>
+          </div>
+          <div class="metric-list">
+            <div><span>Total sem amortizar</span><strong id="baseAmortizationTotal">R$ 0,00</strong></div>
+            <div><span>Total com amortizacao</span><strong id="extraAmortizationTotal">R$ 0,00</strong></div>
+            <div><span>Prazo original</span><strong id="baseAmortizationMonths">0 meses</strong></div>
+            <div><span>Novo prazo</span><strong id="extraAmortizationMonths">0 meses</strong></div>
+            <div><span>Meses reduzidos</span><strong id="monthsSaved">0</strong></div>
+            <div><span>Parcela base comparada</span><strong id="baseFirstPayment">R$ 0,00</strong></div>
+            <div><span>Parcela simulada comparada</span><strong id="extraFirstPayment">R$ 0,00</strong></div>
+            <div class="highlight-row"><span>Reducao da parcela base</span><strong id="paymentReduction">R$ 0,00</strong></div>
+            <div class="investment-result hidden"><span>Taxa usada no investimento</span><strong id="investmentDifferenceRate">0% a.a.</strong></div>
+            <div class="highlight-row investment-result hidden"><span>Investindo a diferenca</span><strong id="investedPaymentDifference">R$ 0,00</strong></div>
+            <div class="investment-result hidden"><span>Ganho estimado do investimento</span><strong id="investmentDifferenceProfit">R$ 0,00</strong></div>
+          </div>
+        </aside>
+      </form>
+
+      <div class="schedule-panel">
+        <div class="section-title compact">
+          <h2>Efeito nas parcelas</h2>
+          <p>A tabela mostra os primeiros meses comparando o contrato base com o cenario amortizado.</p>
+        </div>
+        <nav class="sub-tabs" aria-label="Detalhes da amortizacao">
+          <button class="sub-tab-button active" type="button" data-sub-tab="amortization-table">Parcelas</button>
+          <button class="sub-tab-button investment-sub-tab hidden" type="button" data-sub-tab="amortization-investment-table">Investimento da diferenca</button>
+        </nav>
+        <div class="sub-tab-view active" id="amortization-table">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mes</th>
+                  <th>Base parcela</th>
+                  <th>Base saldo</th>
+                  <th>Com amortizacao</th>
+                  <th>Novo saldo</th>
+                </tr>
+              </thead>
+              <tbody id="amortizationRows"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="sub-tab-view" id="amortization-investment-table">
+          <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mes</th>
+                <th>Diferenca investida</th>
+                <th>Total aportado</th>
+                <th>Saldo investido</th>
+                <th>Ganho estimado</th>
+              </tr>
+            </thead>
+            <tbody id="amortizationInvestmentRows"></tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="page.js"></script>
+</body>
+</html>
