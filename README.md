@@ -1,21 +1,27 @@
-# Instagram Non-Followers — GitHub Pages Simulators
+# Simulador de Financiamentos e Investimentos — GitHub Pages
 
-> Simuladores estáticos para desenvolvimento e demonstração do projeto "instagram-non-followers".
+> Simulador estático para testar e demonstrar cálculos e interfaces de financiamentos e investimentos.
 
 ## Descrição
 
-Esta pasta contém uma versão estática (simulador) que permite visualizar e testar a interface web usada pelo projeto principal. Útil para demos rápidas, desenvolvimento frontend e publicação no GitHub Pages.
+Este diretório contém uma versão estática do simulador que permite:
+
+- Calcular parcelas de financiamentos (sistema PRICE/SAC ou personalizável).
+- Simular trajetórias de investimentos (rendimento simples, composto, taxas prefixadas e atreladas).
+- Ajustar parâmetros como valor, prazo, taxa e periodicidade para ver resultados instantâneos.
+
+O objetivo é servir como preview UI para desenvolvimento frontend, demos e publicação no GitHub Pages.
 
 ## Conteúdo
 
-- `index.html` — página principal do simulador.
+- `index.html` — interface do simulador.
 - `page.css` — estilos da interface.
-- `page.js` — lógica do frontend usada no simulador.
+- `page.js` — lógica dos cálculos e interação (edite para ajustar parâmetros padrão).
 
-## Uso (desenvolvimento local)
+## Como usar (desenvolvimento local)
 
-1. Abra `index.html` diretamente no navegador (funciona para testes simples).
-2. Para um servidor local (recomendado), execute na pasta do projeto:
+1. Abra `index.html` diretamente no navegador para testes rápidos.
+2. Para rodar um servidor local (recomendado), execute na pasta do projeto:
 
 ```bash
 python3 -m http.server 8000
@@ -23,24 +29,29 @@ python3 -m http.server 8000
 npm install -g http-server && http-server -p 8000
 ```
 
-Então acesse: http://localhost:8000
+Acesse: http://localhost:8000
 
-## Publicar no GitHub Pages
+## Personalização rápida
 
-Opções rápidas:
+- Altere valores padrão e fórmulas em `page.js` para adaptar o simulador às regras desejadas.
+- Para adicionar novos tipos de simulação (ex.: amortização diferenciada), estenda a lógica em `page.js` e atualize o HTML conforme necessário.
 
-- Configure o repositório para usar a branch `gh-pages` e publique os arquivos estáticos.
-- Ou coloque os arquivos na pasta `docs/` da branch `main` e ative o GitHub Pages nas configurações do repositório.
+## Publicação no GitHub Pages
+
+Opções:
+
+- Publique a pasta diretamente em uma branch `gh-pages`.
+- Ou mova os arquivos para `docs/` na branch `main` e ative o GitHub Pages nas configurações.
 
 ## Observações
 
-- Este diretório é apenas um simulador/preview estático — não é a extensão Chrome completa.
-- Para integração com a extensão ou backend, consulte o repositório principal do projeto.
+- Este é um simulador estático — não executa validações fiscais ou financeiras oficiais. Use apenas para demonstração e prototipagem.
+- Para integração com backend, bancos de dados ou a versão final da aplicação, consulte o repositório principal do projeto.
 
 ## Contribuição
 
-Sinta-se à vontade para abrir issues ou pull requests com correções, melhorias de layout ou ajustes nas instruções de deploy.
+Abra issues ou PRs para correções, novos cenários de simulação, melhorias de UX ou exemplos de casos de uso.
 
 ## Licença
 
-Licença do projeto principal (ver repositório principal). Se não houver um arquivo de licença aqui, pergunte ao mantenedor.
+Ver licença do repositório principal. Se necessário, adicione um `LICENSE` neste diretório.
