@@ -1,15 +1,23 @@
 :root {
   color-scheme: light;
-  --bg: #f4f7f3;
-  --ink: #16211b;
-  --muted: #5d6b63;
-  --line: #d8e0d8;
+  --bg: #eef3ef;
+  --bg-soft: #f7f9f6;
+  --ink: #14231d;
+  --muted: #64746c;
+  --line: #d9e3dc;
   --panel: #ffffff;
+  --panel-soft: #f8fbf8;
   --accent: #1f7a5a;
   --accent-dark: #14533d;
-  --gold: #c0841d;
+  --accent-soft: #e6f3ed;
+  --gold: #b88421;
+  --gold-soft: #fff5dc;
   --blue: #2f6f96;
-  --shadow: 0 18px 50px rgba(22, 33, 27, 0.1);
+  --blue-soft: #e8f3f7;
+  --danger-soft: #fff2ec;
+  --shadow: 0 20px 60px rgba(20, 35, 29, 0.12);
+  --shadow-soft: 0 10px 30px rgba(20, 35, 29, 0.08);
+  --radius: 8px;
 }
 
 * {
@@ -18,7 +26,9 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at top left, rgba(31, 122, 90, 0.16), transparent 34rem),
+    linear-gradient(180deg, #f9fbf8 0%, var(--bg) 100%);
   color: var(--ink);
   font-family: Inter, Arial, sans-serif;
 }
@@ -32,35 +42,45 @@ select {
 .app-shell {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 28px 0 48px;
+  padding: 28px 0 56px;
 }
 
 .app-header {
   align-items: end;
+  background:
+    linear-gradient(135deg, rgba(20, 83, 61, 0.96), rgba(31, 122, 90, 0.9)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1), transparent);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: #fff;
   display: flex;
   gap: 18px;
   justify-content: space-between;
-  padding: 10px 0 6px;
+  padding: 28px;
 }
 
 .eyebrow {
+  color: rgba(255, 255, 255, 0.72);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0;
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   text-transform: uppercase;
 }
 
 h1 {
-  font-size: clamp(2rem, 4vw, 3.6rem);
+  font-size: clamp(2rem, 4vw, 3.8rem);
   line-height: 1;
   margin: 0;
   max-width: 920px;
 }
 
 .source-link {
-  border: 1px solid var(--line);
-  color: var(--accent-dark);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: var(--radius);
+  color: #fff;
   font-size: 0.9rem;
   font-weight: 800;
   padding: 12px 14px;
@@ -68,27 +88,44 @@ h1 {
   white-space: nowrap;
 }
 
+.source-link:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
 .tabs {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
   display: flex;
-  gap: 10px;
-  margin: 22px 0;
+  gap: 6px;
+  margin: 18px 0;
+  padding: 6px;
 }
 
 .tab-button,
 .sub-tab-button {
   background: transparent;
-  border: 1px solid var(--line);
+  border: 0;
+  border-radius: 6px;
   color: var(--muted);
   cursor: pointer;
-  min-height: 44px;
+  font-weight: 800;
+  min-height: 42px;
   padding: 0 18px;
+}
+
+.tab-button:hover,
+.sub-tab-button:hover {
+  background: var(--panel-soft);
+  color: var(--ink);
 }
 
 .tab-button.active,
 .sub-tab-button.active {
   background: var(--ink);
-  border-color: var(--ink);
   color: #fff;
+  box-shadow: 0 8px 20px rgba(20, 35, 29, 0.18);
 }
 
 .tab-view {
@@ -100,9 +137,13 @@ h1 {
 }
 
 .sub-tabs {
-  display: flex;
-  gap: 10px;
+  background: var(--panel-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: inline-flex;
+  gap: 6px;
   margin: 0 0 16px;
+  padding: 5px;
 }
 
 .sub-tab-view {
@@ -116,16 +157,25 @@ h1 {
 .calculator {
   display: grid;
   gap: 18px;
-  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.85fr);
 }
 
 .form-panel,
 .result-panel,
 .schedule-panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(217, 227, 220, 0.9);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
   padding: 24px;
+}
+
+.result-panel {
+  align-self: start;
+  display: grid;
+  gap: 18px;
+  position: sticky;
+  top: 18px;
 }
 
 .section-title h2 {
@@ -147,7 +197,7 @@ h1 {
 }
 
 .section-title.compact p {
-  max-width: 520px;
+  max-width: 560px;
   text-align: right;
 }
 
@@ -161,8 +211,15 @@ label {
   color: var(--muted);
   display: grid;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 800;
   gap: 7px;
+}
+
+.checkbox-field {
+  background: var(--accent-soft);
+  border: 1px solid #cfe5da;
+  border-radius: var(--radius);
+  padding: 12px;
 }
 
 .checkbox-field > span:first-child {
@@ -173,19 +230,28 @@ label {
 }
 
 .checkbox-field input {
+  accent-color: var(--accent);
   min-height: auto;
   width: auto;
 }
 
 input,
 select {
-  background: #fbfcfb;
+  background: var(--panel);
   border: 1px solid var(--line);
+  border-radius: 6px;
   color: var(--ink);
   min-height: 46px;
   outline: none;
   padding: 0 12px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
   width: 100%;
+}
+
+input:hover,
+select:hover,
+.money-input:hover {
+  border-color: #bed0c5;
 }
 
 input:focus,
@@ -196,20 +262,23 @@ select:focus {
 
 .money-input {
   align-items: center;
-  background: #fbfcfb;
+  background: var(--panel);
   border: 1px solid var(--line);
+  border-radius: 6px;
   display: grid;
   grid-template-columns: auto 1fr;
   min-height: 46px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .money-input > span {
-  color: var(--muted);
-  font-weight: 800;
+  color: var(--accent-dark);
+  font-weight: 900;
   padding-left: 12px;
 }
 
 .money-input input {
+  background: transparent;
   border: 0;
   min-height: 44px;
 }
@@ -246,14 +315,12 @@ input[type="range"] {
   display: none;
 }
 
-.result-panel {
-  display: grid;
-  gap: 18px;
-}
-
 .metric {
-  background: #eef6f1;
-  border-left: 5px solid var(--accent);
+  background:
+    linear-gradient(135deg, rgba(230, 243, 237, 0.98), rgba(255, 255, 255, 0.98));
+  border: 1px solid #cfe5da;
+  border-left: 6px solid var(--accent);
+  border-radius: var(--radius);
   display: grid;
   gap: 8px;
   padding: 18px;
@@ -264,37 +331,47 @@ input[type="range"] {
 .comparison-card span,
 .comparison-card small {
   color: var(--muted);
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: 0.86rem;
+  font-weight: 800;
 }
 
 .metric strong {
   color: var(--accent-dark);
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-size: clamp(1.75rem, 4vw, 2.55rem);
   line-height: 1;
   overflow-wrap: anywhere;
 }
 
 .metric-list {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   display: grid;
-  gap: 1px;
+  overflow: hidden;
 }
 
 .metric-list div {
   align-items: center;
-  background: #f8faf8;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
   display: flex;
+  gap: 12px;
   justify-content: space-between;
-  min-height: 48px;
-  padding: 10px 12px;
+  min-height: 50px;
+  padding: 11px 13px;
+}
+
+.metric-list div:last-child {
+  border-bottom: 0;
 }
 
 .metric-list .highlight-row {
-  background: #edf6f8;
+  background: var(--blue-soft);
   border-left: 4px solid var(--blue);
 }
 
 .metric-list strong {
+  color: var(--ink);
+  font-weight: 900;
   text-align: right;
 }
 
@@ -305,9 +382,12 @@ input[type="range"] {
 }
 
 .comparison-card {
+  background: var(--panel);
   border: 1px solid var(--line);
+  border-radius: var(--radius);
   display: grid;
   gap: 8px;
+  min-height: 124px;
   padding: 16px;
 }
 
@@ -329,6 +409,8 @@ input[type="range"] {
 }
 
 .table-wrap {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   overflow-x: auto;
 }
 
@@ -341,9 +423,21 @@ table {
 th,
 td {
   border-bottom: 1px solid var(--line);
-  padding: 12px;
+  padding: 13px 14px;
   text-align: right;
   white-space: nowrap;
+}
+
+tbody tr:nth-child(even) {
+  background: #fafcf9;
+}
+
+tbody tr:hover {
+  background: var(--accent-soft);
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 th:first-child,
@@ -352,8 +446,10 @@ td:first-child {
 }
 
 th {
+  background: #f2f6f3;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
+  font-weight: 900;
   text-transform: uppercase;
 }
 
@@ -363,6 +459,7 @@ th {
     padding-top: 10px;
   }
 
+  .app-header,
   .calculator {
     grid-template-columns: 1fr;
   }
@@ -370,6 +467,11 @@ th {
   .app-header {
     align-items: start;
     display: grid;
+    padding: 22px;
+  }
+
+  .result-panel {
+    position: static;
   }
 
   .field-grid,
@@ -377,7 +479,8 @@ th {
     grid-template-columns: 1fr;
   }
 
-  .tabs {
+  .tabs,
+  .sub-tabs {
     display: grid;
     grid-template-columns: 1fr;
   }
