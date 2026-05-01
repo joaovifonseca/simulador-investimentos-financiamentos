@@ -234,34 +234,94 @@ function simulatePriceReducePayment(principal, monthlyRate, months, monthlyExtra
   return { totalPaid, rows };
 }
 
-function renderSchedule(sacRows, priceRows) {
+function renderSchedule(sacRows, priceRows, system = "compare") {
   const tbody = document.getElementById("scheduleRows");
   tbody.innerHTML = "";
   const limit = Math.max(sacRows.length, priceRows.length, 12);
+  const cols = {
+    month: document.getElementById("scheduleColMonth"),
+    payment1: document.getElementById("scheduleColPayment1"),
+    interest1: document.getElementById("scheduleColInterest1"),
+    balance1: document.getElementById("scheduleColBalance1"),
+    payment2: document.getElementById("scheduleColPayment2"),
+    interest2: document.getElementById("scheduleColInterest2"),
+    balance2: document.getElementById("scheduleColBalance2")
+  };
+
+  const setColText = (key, value) => {
+    if (cols[key]) cols[key].textContent = value;
+  };
+
+  const setSacColumns = (visible) => {
+    setColText("payment1", visible ? "SAC parcela" : "-");
+    setColText("interest1", visible ? "SAC juros" : "-");
+    setColText("balance1", visible ? "SAC saldo" : "-");
+  };
+
+  const setPriceColumns = (visible) => {
+    setColText("payment2", visible ? "PRICE parcela" : "-");
+    setColText("interest2", visible ? "PRICE juros" : "-");
+    setColText("balance2", visible ? "PRICE saldo" : "-");
+  };
+
+  if (system === "sac") {
+    setSacColumns(true);
+    setPriceColumns(false);
+  } else if (system === "price") {
+    setSacColumns(false);
+    setPriceColumns(true);
+  } else {
+    setSacColumns(true);
+    setPriceColumns(true);
+  }
+
+  const buildRow = (cells) => {
+    const row = document.createElement("tr");
+    row.innerHTML = cells.map((cell) => `<td>${cell}</td>`).join("");
+    tbody.appendChild(row);
+  };
 
   for (let index = 0; index < Math.min(limit, 24); index += 1) {
     const sac = sacRows[index];
     const price = priceRows[index];
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${sac ? money(sac.payment) : "-"}</td>
-      <td>${sac ? money(sac.interest) : "-"}</td>
-      <td>${sac ? money(sac.balance) : "-"}</td>
-      <td>${price ? money(price.payment) : "-"}</td>
-      <td>${price ? money(price.interest) : "-"}</td>
-      <td>${price ? money(price.balance) : "-"}</td>
-    `;
-    tbody.appendChild(row);
+    if (system === "sac") {
+      buildRow([
+        index + 1,
+        sac ? money(sac.payment) : "-",
+        sac ? money(sac.interest) : "-",
+        sac ? money(sac.balance) : "-",
+        "-", "-", "-"
+      ]);
+    } else if (system === "price") {
+      buildRow([
+        index + 1,
+        "-", "-", "-",
+        price ? money(price.payment) : "-",
+        price ? money(price.interest) : "-",
+        price ? money(price.balance) : "-"
+      ]);
+    } else {
+      buildRow([
+        index + 1,
+        sac ? money(sac.payment) : "-",
+        sac ? money(sac.interest) : "-",
+        sac ? money(sac.balance) : "-",
+        price ? money(price.payment) : "-",
+        price ? money(price.interest) : "-",
+        price ? money(price.balance) : "-"
+      ]);
+    }
   }
 }
 
 function simulateMortgage() {
   const propertyValue = numberValue("propertyValue");
-  const downPayment = numberValue("downPayment");
-  const principal = Math.max(0, propertyValue - downPayment);
+  const downPaymentPercent = Math.min(100, Math.max(0, numberValue("downPaymentPercent")));
+  const downPaymentAmount = propertyValue * (downPaymentPercent / 100);
+  const principal = Math.max(0, propertyValue - downPaymentAmount);
   const annualRate = numberValue("mortgageAnnualRate");
   const months = Math.max(1, Math.round(numberValue("mortgageTerm")));
+  const system = document.getElementById("mortgageSystem").value;
   const monthlyInsurance = Math.max(0, numberValue("monthlyInsurance"));
   const monthlyAdminFee = Math.max(0, numberValue("monthlyAdminFee"));
   const upfrontBankFees = Math.max(0, numberValue("upfrontBankFees"));
@@ -271,8 +331,23 @@ function simulateMortgage() {
   const priceBase = simulatePrice(principal, monthlyRate, months);
   const sac = addCharges(sacBase, monthlyCharges, upfrontBankFees);
   const price = addCharges(priceBase, monthlyCharges, upfrontBankFees);
+  const showSac = system === "compare" || system === "sac";
+  const showPrice = system === "compare" || system === "price";
 
   setText("financedAmount", money(principal));
+  setText("downPaymentAmount", money(downPaymentAmount));
+  setText("downPaymentPercentDisplay", `${downPaymentPercent.toFixed(0)}%`);
+  setText("mortgageSelectedSystem", system === "compare" ? "Comparar SAC e PRICE" : system.toUpperCase());
+  if (system === "sac") {
+    setText("mortgageSelectedTotal", money(sac.totalPaid));
+    setText("mortgageSelectedFirstPayment", money(sac.rows[0]?.payment || 0));
+  } else if (system === "price") {
+    setText("mortgageSelectedTotal", money(price.totalPaid));
+    setText("mortgageSelectedFirstPayment", money(price.rows[0]?.payment || 0));
+  } else {
+    setText("mortgageSelectedTotal", `SAC: ${money(sac.totalPaid)} | PRICE: ${money(price.totalPaid)}`);
+    setText("mortgageSelectedFirstPayment", `SAC: ${money(sac.rows[0]?.payment || 0)} | PRICE: ${money(price.rows[0]?.payment || 0)}`);
+  }
   setText("sacTotal", money(sac.totalPaid));
   setText("priceTotal", money(price.totalPaid));
   setText("sacSummary", `${sac.rows.length} parcelas, juros ${money(sacBase.totalPaid - principal)}`);
@@ -281,7 +356,117 @@ function simulateMortgage() {
   setText("priceFirstPayment", money(price.rows[0]?.payment || 0));
   setText("monthlyBankCharges", money(monthlyCharges));
   setText("upfrontFeesResult", money(upfrontBankFees));
-  renderSchedule(sac.rows, price.rows);
+  document.getElementById("sacCard").classList.toggle("hidden", !showSac);
+  document.getElementById("priceCard").classList.toggle("hidden", !showPrice);
+  renderSchedule(sac.rows, price.rows, system);
+}
+
+function annualIncrementValue(baseValue, annualRate, month) {
+  const yearsElapsed = Math.floor((month - 1) / 12);
+  return baseValue * Math.pow(1 + annualRate / 100, yearsElapsed);
+}
+
+function resolveRentBuySystem(system, sac, price) {
+  if (system === "price") {
+    return { systemLabel: "PRICE", selectedRows: price.rows, selectedTotal: price.totalPaid, selectedFirstPayment: price.rows[0]?.payment || 0 };
+  }
+
+  return { systemLabel: "SAC", selectedRows: sac.rows, selectedTotal: sac.totalPaid, selectedFirstPayment: sac.rows[0]?.payment || 0 };
+}
+
+function renderRentBuyRows(rows) {
+  const tbody = document.getElementById("rentBuyRows");
+  tbody.innerHTML = "";
+
+  rows.slice(0, 240).forEach((item) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${item.month}</td>
+      <td>${money(item.rent)}</td>
+      <td>${money(item.rentAccumulated)}</td>
+      <td>${money(item.financePayment)}</td>
+      <td>${money(item.buyAccumulated)}</td>
+      <td>${money(item.outstandingBalance)}</td>
+      <td>${money(item.homeEquity)}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function simulateRentVsBuy() {
+  const propertyValue = numberValue("rentBuyPropertyValue");
+  const downPaymentPercent = Math.min(100, Math.max(20, numberValue("rentBuyDownPaymentPercent")));
+  const downPaymentAmount = propertyValue * (downPaymentPercent / 100);
+  const financedAmount = Math.max(0, propertyValue - downPaymentAmount);
+  const annualRate = numberValue("rentBuyMortgageAnnualRate");
+  const months = Math.max(1, Math.round(numberValue("rentBuyMortgageTerm")));
+  const mortgageSystem = document.getElementById("rentBuyMortgageSystem").value;
+  const amortizationType = document.getElementById("rentBuyAmortizationType").value;
+  const monthlyExtra = amortizationType === "monthly" ? Math.max(0, numberValue("rentBuyMonthlyExtraAmortization")) : 0;
+  const extraStartMonth = amortizationType === "monthly" ? Math.max(1, Math.round(numberValue("rentBuyExtraStartMonth"))) : 1;
+  const oneTimeExtra = amortizationType === "oneTime" ? Math.max(0, numberValue("rentBuyOneTimeAmortization")) : 0;
+  const oneTimeMonth = amortizationType === "oneTime" ? Math.max(1, Math.round(numberValue("rentBuyOneTimeMonth"))) : 0;
+  const monthlyInsurance = Math.max(0, numberValue("rentBuyMonthlyInsurance"));
+  const monthlyAdminFee = Math.max(0, numberValue("rentBuyMonthlyAdminFee"));
+  const upfrontBankFees = Math.max(0, numberValue("rentBuyUpfrontBankFees"));
+  const rentMonthly = Math.max(0, numberValue("rentMonthly"));
+  const rentAnnualIncrease = Math.max(0, numberValue("rentAnnualIncrease"));
+  const propertyAppreciationAnnual = Math.max(0, numberValue("propertyAppreciationAnnual"));
+  const investmentAnnualRate = Math.max(0, numberValue("rentBuyInvestmentAnnualRate"));
+  const monthlyCharges = monthlyInsurance + monthlyAdminFee;
+  const monthlyRate = monthlyRateFromAnnual(annualRate);
+  const investmentMonthlyRate = monthlyRateFromAnnual(investmentAnnualRate);
+  const sac = addCharges(simulateSac(financedAmount, monthlyRate, months, monthlyExtra, oneTimeExtra, oneTimeMonth, extraStartMonth), monthlyCharges, upfrontBankFees);
+  const price = addCharges(simulatePrice(financedAmount, monthlyRate, months, monthlyExtra, oneTimeExtra, oneTimeMonth, extraStartMonth), monthlyCharges, upfrontBankFees);
+  const selected = resolveRentBuySystem(mortgageSystem, sac, price);
+  const selectedRows = selected.selectedRows;
+
+  let rentAccumulated = 0;
+  let buyAccumulated = downPaymentAmount + upfrontBankFees;
+  let rentBalance = downPaymentAmount + upfrontBankFees;
+  const totalInterest = selectedRows.reduce((sum, row) => sum + (row.interest || 0), 0);
+  const rows = [];
+
+  for (let month = 1; month <= months; month += 1) {
+    const rent = annualIncrementValue(rentMonthly, rentAnnualIncrease, month);
+    const financePayment = selectedRows[month - 1]?.payment || 0;
+    const outstandingBalance = selectedRows[month - 1]?.balance || 0;
+    const homeValue = propertyValue * Math.pow(1 + propertyAppreciationAnnual / 100, month / 12);
+
+    rentAccumulated += rent;
+    buyAccumulated += financePayment;
+    rentBalance = rentBalance * (1 + investmentMonthlyRate) + (financePayment - rent);
+
+    rows.push({
+      month,
+      rent,
+      rentAccumulated,
+      financePayment,
+      buyAccumulated,
+      outstandingBalance,
+      homeEquity: Math.max(0, homeValue - outstandingBalance),
+      rentBalance
+    });
+  }
+
+  const finalHomeValue = propertyValue * Math.pow(1 + propertyAppreciationAnnual / 100, months / 12);
+  const finalOutstanding = selectedRows[selectedRows.length - 1]?.balance || 0;
+  const buyerNet = finalHomeValue - finalOutstanding - totalInterest - (monthlyCharges * months) - upfrontBankFees;
+  const rentNet = rentBalance;
+  const buyNet = buyerNet;
+  const difference = buyNet - rentNet;
+  const winner = difference >= 0 ? "Comprar" : "Alugar";
+
+  setText("rentBuyWinner", winner);
+  setText("rentBuyPurchaseNet", money(buyNet));
+  setText("rentBuyRentNet", money(rentNet));
+  setText("rentBuyPurchaseCost", money(buyAccumulated));
+  setText("rentBuyRentCost", money(rentAccumulated));
+  setText("rentBuyPropertyValue", money(finalHomeValue));
+  setText("rentBuySystemUsed", selected.systemLabel);
+  setText("rentBuyFirstPayment", money(selected.selectedFirstPayment));
+  setText("rentBuyFirstRent", money(rentMonthly));
+  renderRentBuyRows(rows);
 }
 
 function renderAmortizationSchedule(baseRows, extraRows) {
@@ -438,26 +623,53 @@ function setActiveSubTab(tabId) {
   });
 }
 
-function syncPropertyValue(event) {
-  const range = document.getElementById("propertyValueRange");
-  const input = document.getElementById("propertyValue");
+function syncPairedNumber(event, rangeId, inputId, min = 0, max = Number.POSITIVE_INFINITY) {
+  const range = document.getElementById(rangeId);
+  const input = document.getElementById(inputId);
   const source = event?.target;
+
+  if (!range || !input) return;
 
   if (source === range) {
     input.value = range.value;
     return;
   }
 
-  const value = Math.max(0, numberValue("propertyValue"));
+  const value = Math.min(max, Math.max(min, Number(input.value) || 0));
+  input.value = value;
   if (value >= Number(range.min) && value <= Number(range.max)) {
     range.value = value;
   }
+}
+
+function syncPropertyValue(event) {
+  syncPairedNumber(event, "propertyValueRange", "propertyValue", 0, Number.POSITIVE_INFINITY);
+}
+
+function syncDownPaymentPercent(event) {
+  syncPairedNumber(event, "downPaymentPercentRange", "downPaymentPercent", 20, 100);
+}
+
+function syncRentBuyPropertyValue(event) {
+  syncPairedNumber(event, "rentBuyPropertyValueRange", "rentBuyPropertyValue", 0, Number.POSITIVE_INFINITY);
+}
+
+function syncRentBuyDownPaymentPercent(event) {
+  syncPairedNumber(event, "rentBuyDownPaymentPercentRange", "rentBuyDownPaymentPercent", 20, 100);
 }
 
 function updateAmortizationFields() {
   const amortizationType = document.getElementById("amortizationType").value;
   document.querySelectorAll("[data-amortization-group]").forEach((field) => {
     field.classList.toggle("hidden", field.dataset.amortizationGroup !== amortizationType);
+  });
+}
+
+function updateRentBuyAmortizationFields() {
+  const amortizationType = document.getElementById("rentBuyAmortizationType").value;
+  const shouldShow = amortizationType !== "none";
+  document.querySelectorAll("[data-rentbuy-amortization-group]").forEach((field) => {
+    field.classList.toggle("hidden", !shouldShow || field.dataset.rentbuyAmortizationGroup !== amortizationType);
   });
 }
 
@@ -484,11 +696,34 @@ function bindCalculators() {
   document.querySelectorAll("input, select").forEach((field) => {
     field.addEventListener("input", (event) => {
       syncPropertyValue(event);
+      syncDownPaymentPercent(event);
+      syncRentBuyPropertyValue(event);
+      syncRentBuyDownPaymentPercent(event);
       updateAmortizationFields();
+      updateRentBuyAmortizationFields();
       updateInvestmentOptions();
       simulateInvestment();
       simulateMortgage();
+      simulateRentVsBuy();
       simulateAmortization();
+    });
+  });
+
+  document.querySelectorAll("form.calculator").forEach((form) => {
+    form.addEventListener("reset", () => {
+      window.setTimeout(() => {
+        syncPropertyValue({ target: document.getElementById("propertyValueRange") });
+        syncDownPaymentPercent({ target: document.getElementById("downPaymentPercentRange") });
+        syncRentBuyPropertyValue({ target: document.getElementById("rentBuyPropertyValueRange") });
+        syncRentBuyDownPaymentPercent({ target: document.getElementById("rentBuyDownPaymentPercentRange") });
+        updateAmortizationFields();
+        updateRentBuyAmortizationFields();
+        updateInvestmentOptions();
+        simulateInvestment();
+        simulateMortgage();
+        simulateRentVsBuy();
+        simulateAmortization();
+      }, 0);
     });
   });
 }
@@ -497,7 +732,9 @@ bindTabs();
 bindSubTabs();
 bindCalculators();
 updateAmortizationFields();
+updateRentBuyAmortizationFields();
 updateInvestmentOptions();
 simulateInvestment();
 simulateMortgage();
+simulateRentVsBuy();
 simulateAmortization();

@@ -47,16 +47,35 @@
 <body>
   <main class="app-shell">
     <header class="app-header">
-      <div>
-        <p class="eyebrow">Planejamento financeiro</p>
-        <h1>Simuladores financeiros</h1>
+      <div class="brand">
+        <div class="logo" aria-hidden>
+          <!-- simple SVG logo -->
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="10" fill="url(#g)"/>
+            <path d="M14 30L20 20L26 26L34 14" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#2f6f96"/>
+                <stop offset="1" stop-color="#1f7a5a"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <p class="eyebrow">Planejamento financeiro</p>
+          <h1>Simuladores financeiros</h1>
+          <p class="tagline">Compare financiamentos, simule investimentos e amortizações</p>
+        </div>
       </div>
-      <a class="source-link" href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noreferrer">Tabela IR 2026</a>
+      <div class="header-actions">
+        <a class="source-link" href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noreferrer">Tabela IR 2026</a>
+      </div>
     </header>
 
     <nav class="tabs" aria-label="Simuladores">
       <button class="tab-button active" id="tab-investments" type="button" data-tab="investments">Investimentos</button>
       <button class="tab-button" id="tab-mortgage" type="button" data-tab="mortgage">Financiamento</button>
+      <button class="tab-button" id="tab-rentbuy" type="button" data-tab="rent-buy">Aluguel x Financiamento</button>
       <button class="tab-button" id="tab-amortization" type="button" data-tab="amortization">Amortizacao</button>
     </nav>
 
@@ -112,7 +131,7 @@
         <aside class="result-panel">
           <div class="metric primary">
             <span>Valor liquido final</span>
-            <strong id="investmentNetValue">R$ 0,00</strong>
+            <strong id="investmentNetValue" role="status" aria-live="polite">R$ 0,00</strong>
           </div>
           <div class="metric-list">
             <div><span>Total investido</span><strong id="investmentDeposited">R$ 0,00</strong></div>
@@ -122,6 +141,9 @@
             <div><span>Aliquota aplicada</span><strong id="investmentTaxRate">0%</strong></div>
           </div>
         </aside>
+        <div class="controls-row">
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+        </div>
       </form>
 
       <div class="schedule-panel">
@@ -151,7 +173,7 @@
         <div class="form-panel">
           <div class="section-title">
             <h2>Financiamento imobiliario</h2>
-            <p>Compare SAC e PRICE sem amortizacoes extras.</p>
+            <p>Compare SAC e PRICE ou escolha um sistema principal para acompanhar o resultado.</p>
           </div>
 
           <div class="field-grid">
@@ -164,9 +186,12 @@
               <span class="field-hint">Arraste para ajustar rapido ou digite qualquer valor no campo.</span>
             </label>
             <label>
-              Entrada
-              <span class="money-input"><span>R$</span><input type="number" id="downPayment" min="0" step="1000" inputmode="decimal" placeholder="Ex: 100000" value="100000"></span>
-              <span class="field-hint">Parte paga a vista. O financiado sera imovel menos entrada.</span>
+              Entrada (% do imóvel)
+              <div class="range-field">
+                <input type="range" id="downPaymentPercentRange" min="20" max="100" step="1" value="20">
+                <span class="money-input"><span>%</span><input type="number" id="downPaymentPercent" min="20" max="100" step="1" inputmode="decimal" placeholder="Ex: 20" value="20"></span>
+              </div>
+              <span class="field-hint">Normalmente os bancos pedem no mínimo 20% de entrada.</span>
             </label>
             <label>
               Juros anual (%)
@@ -177,6 +202,15 @@
               Prazo (meses)
               <input type="number" id="mortgageTerm" min="1" step="1" inputmode="numeric" placeholder="Ex: 360" value="360">
               <span class="field-hint">360 meses equivalem a 30 anos.</span>
+            </label>
+            <label>
+              Sistema de amortizacao
+              <select id="mortgageSystem">
+                <option value="compare">Comparar SAC e PRICE</option>
+                <option value="sac">SAC</option>
+                <option value="price">PRICE</option>
+              </select>
+              <span class="field-hint">Escolha um sistema para destacar nos resultados ou compare os dois ao mesmo tempo.</span>
             </label>
             <label>
               Seguro mensal
@@ -198,25 +232,33 @@
 
         <aside class="result-panel">
           <div class="comparison">
-            <article class="comparison-card">
+            <article class="comparison-card" id="sacCard">
               <span>SAC</span>
-              <strong id="sacTotal">R$ 0,00</strong>
+              <strong id="sacTotal" role="status" aria-live="polite">R$ 0,00</strong>
               <small id="sacSummary">0 parcelas</small>
             </article>
-            <article class="comparison-card">
+            <article class="comparison-card" id="priceCard">
               <span>PRICE</span>
-              <strong id="priceTotal">R$ 0,00</strong>
+              <strong id="priceTotal" role="status" aria-live="polite">R$ 0,00</strong>
               <small id="priceSummary">0 parcelas</small>
             </article>
           </div>
           <div class="metric-list">
             <div><span>Valor financiado</span><strong id="financedAmount">R$ 0,00</strong></div>
+            <div><span>Entrada</span><strong id="downPaymentPercentDisplay">20%</strong></div>
+            <div><span>Valor de entrada</span><strong id="downPaymentAmount">R$ 0,00</strong></div>
+            <div><span>Sistema escolhido</span><strong id="mortgageSelectedSystem">Comparar</strong></div>
+            <div><span>Total do sistema</span><strong id="mortgageSelectedTotal">R$ 0,00</strong></div>
+            <div><span>Primeira parcela</span><strong id="mortgageSelectedFirstPayment">R$ 0,00</strong></div>
             <div><span>Primeira SAC</span><strong id="sacFirstPayment">R$ 0,00</strong></div>
             <div><span>Parcela PRICE</span><strong id="priceFirstPayment">R$ 0,00</strong></div>
             <div><span>Encargos mensais</span><strong id="monthlyBankCharges">R$ 0,00</strong></div>
             <div><span>Taxas iniciais</span><strong id="upfrontFeesResult">R$ 0,00</strong></div>
           </div>
         </aside>
+        <div class="controls-row">
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+        </div>
       </form>
 
       <div class="schedule-panel">
@@ -228,16 +270,171 @@
           <table>
             <thead>
               <tr>
-                <th>Mes</th>
-                <th>SAC parcela</th>
-                <th>SAC juros</th>
-                <th>SAC saldo</th>
-                <th>PRICE parcela</th>
-                <th>PRICE juros</th>
-                <th>PRICE saldo</th>
+                <th id="scheduleColMonth">Mes</th>
+                <th id="scheduleColPayment1">SAC parcela</th>
+                <th id="scheduleColInterest1">SAC juros</th>
+                <th id="scheduleColBalance1">SAC saldo</th>
+                <th id="scheduleColPayment2">PRICE parcela</th>
+                <th id="scheduleColInterest2">PRICE juros</th>
+                <th id="scheduleColBalance2">PRICE saldo</th>
               </tr>
             </thead>
             <tbody id="scheduleRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="rent-buy" class="tab-view" aria-labelledby="tab-rentbuy">
+      <form class="calculator" id="rent-buy-form">
+        <div class="form-panel">
+          <div class="section-title">
+            <h2>Aluguel x financiamento</h2>
+            <p>Comparação independente, com os próprios parâmetros de compra e aluguel.</p>
+          </div>
+
+          <div class="field-grid">
+            <label>
+              Valor do imóvel
+              <div class="range-field">
+                <input type="range" id="rentBuyPropertyValueRange" min="50000" max="3000000" step="10000" value="500000">
+                <span class="money-input"><span>R$</span><input type="number" id="rentBuyPropertyValue" min="0" step="1000" inputmode="decimal" placeholder="Ex: 500000" value="500000"></span>
+              </div>
+              <span class="field-hint">Defina o imóvel usado só nesta comparação.</span>
+            </label>
+            <label>
+              Entrada (% do imóvel)
+              <div class="range-field">
+                <input type="range" id="rentBuyDownPaymentPercentRange" min="20" max="100" step="1" value="20">
+                <span class="money-input"><span>%</span><input type="number" id="rentBuyDownPaymentPercent" min="20" max="100" step="1" inputmode="decimal" placeholder="Ex: 20" value="20"></span>
+              </div>
+              <span class="field-hint">Entrada mínima de 20% para o comparador.</span>
+            </label>
+            <label>
+              Juros anual (% do financiamento)
+              <input type="number" id="rentBuyMortgageAnnualRate" min="0" step="0.01" inputmode="decimal" placeholder="Ex: 10.5" value="10.5">
+              <span class="field-hint">Taxa usada só na comparação aluguel x compra.</span>
+            </label>
+            <label>
+              Prazo do financiamento (meses)
+              <input type="number" id="rentBuyMortgageTerm" min="1" step="1" inputmode="numeric" placeholder="Ex: 360" value="360">
+              <span class="field-hint">Quantidade de parcelas da simulação de compra.</span>
+            </label>
+            <label>
+              Sistema de amortização
+              <select id="rentBuyMortgageSystem">
+                <option value="sac">SAC</option>
+                <option value="price">PRICE</option>
+              </select>
+              <span class="field-hint">Escolha o sistema usado nesta comparação.</span>
+            </label>
+            <label>
+              Opção de amortização
+              <select id="rentBuyAmortizationType">
+                <option value="none">Sem amortização</option>
+                <option value="monthly">Amortização mensal</option>
+                <option value="oneTime">Amortização avulsa</option>
+              </select>
+              <span class="field-hint">Adicione amortização extra no financiamento desta comparação.</span>
+            </label>
+            <label class="rentbuy-amortization-option hidden" data-rentbuy-amortization-group="monthly">
+              Amortização extra mensal
+              <span class="money-input"><span>R$</span><input type="number" id="rentBuyMonthlyExtraAmortization" min="0" step="100" inputmode="decimal" placeholder="Ex: 1000" value="1000"></span>
+              <span class="field-hint">Valor pago todo mês para reduzir o saldo.</span>
+            </label>
+            <label class="rentbuy-amortization-option hidden" data-rentbuy-amortization-group="monthly">
+              Começar no mês
+              <input type="number" id="rentBuyExtraStartMonth" min="1" step="1" inputmode="numeric" placeholder="Ex: 1" value="1">
+              <span class="field-hint">Mês em que a amortização mensal começa a valer.</span>
+            </label>
+            <label class="rentbuy-amortization-option hidden" data-rentbuy-amortization-group="oneTime">
+              Amortização avulsa
+              <span class="money-input"><span>R$</span><input type="number" id="rentBuyOneTimeAmortization" min="0" step="100" inputmode="decimal" placeholder="Ex: 20000" value="20000"></span>
+              <span class="field-hint">Pagamento único para abater o saldo devedor.</span>
+            </label>
+            <label class="rentbuy-amortization-option hidden" data-rentbuy-amortization-group="oneTime">
+              Mês da amortização avulsa
+              <input type="number" id="rentBuyOneTimeMonth" min="1" step="1" inputmode="numeric" placeholder="Ex: 12" value="12">
+              <span class="field-hint">Mês em que o pagamento único será feito.</span>
+            </label>
+            <label>
+              Seguro mensal
+              <span class="money-input"><span>R$</span><input type="number" id="rentBuyMonthlyInsurance" min="0" step="10" inputmode="decimal" placeholder="Ex: 180" value="180"></span>
+              <span class="field-hint">Seguro da simulação de compra.</span>
+            </label>
+            <label>
+              Taxa administrativa mensal
+              <span class="money-input"><span>R$</span><input type="number" id="rentBuyMonthlyAdminFee" min="0" step="5" inputmode="decimal" placeholder="Ex: 25" value="25"></span>
+              <span class="field-hint">Tarifa mensal usada só na comparação.</span>
+            </label>
+            <label>
+              Taxas iniciais
+              <span class="money-input"><span>R$</span><input type="number" id="rentBuyUpfrontBankFees" min="0" step="100" inputmode="decimal" placeholder="Ex: 3500" value="3500"></span>
+              <span class="field-hint">Custos iniciais da compra nesta simulação.</span>
+            </label>
+            <label>
+              Aluguel mensal inicial
+              <span class="money-input"><span>R$</span><input type="number" id="rentMonthly" min="0" step="50" inputmode="decimal" placeholder="Ex: 2500" value="2500"></span>
+              <span class="field-hint">Valor do aluguel no primeiro mês.</span>
+            </label>
+            <label>
+              Reajuste anual do aluguel (%)
+              <input type="number" id="rentAnnualIncrease" min="0" step="0.1" inputmode="decimal" placeholder="Ex: 5" value="5">
+              <span class="field-hint">Use a média esperada de reajuste anual do contrato.</span>
+            </label>
+            <label>
+              Valorização anual do imóvel (%)
+              <input type="number" id="propertyAppreciationAnnual" min="0" step="0.1" inputmode="decimal" placeholder="Ex: 8" value="8">
+              <span class="field-hint">Estimativa de aumento do valor do imóvel no período.</span>
+            </label>
+            <label>
+              Rendimento anual do investimento (%)
+              <input type="number" id="rentBuyInvestmentAnnualRate" min="0" step="0.1" inputmode="decimal" placeholder="Ex: 10.5" value="10.5">
+              <span class="field-hint">Taxa usada para investir a diferença entre alugar e comprar.</span>
+            </label>
+          </div>
+        </div>
+
+        <aside class="result-panel">
+          <div class="metric primary">
+            <span>Melhor cenário</span>
+            <strong id="rentBuyWinner" role="status" aria-live="polite">—</strong>
+          </div>
+          <div class="metric-list">
+            <div><span>Resultado compra</span><strong id="rentBuyPurchaseNet">R$ 0,00</strong></div>
+            <div><span>Resultado aluguel</span><strong id="rentBuyRentNet">R$ 0,00</strong></div>
+            <div><span>Custo total compra</span><strong id="rentBuyPurchaseCost">R$ 0,00</strong></div>
+            <div><span>Custo total aluguel</span><strong id="rentBuyRentCost">R$ 0,00</strong></div>
+            <div><span>Patrimônio final do imóvel</span><strong id="rentBuyPropertyValue">R$ 0,00</strong></div>
+            <div><span>Sistema usado</span><strong id="rentBuySystemUsed">—</strong></div>
+            <div><span>Parcela inicial financiamento</span><strong id="rentBuyFirstPayment">R$ 0,00</strong></div>
+            <div><span>Aluguel inicial</span><strong id="rentBuyFirstRent">R$ 0,00</strong></div>
+          </div>
+        </aside>
+        <div class="controls-row">
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+        </div>
+      </form>
+
+      <div class="schedule-panel">
+        <div class="section-title compact">
+          <h2>Evolução aluguel x financiamento</h2>
+          <p>Comparação mensal entre o aluguel pago e o custo acumulado da compra, com patrimônio estimado do imóvel.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mes</th>
+                <th>Aluguel</th>
+                <th>Aluguel acumulado</th>
+                <th>Financiamento</th>
+                <th>Compra acumulada</th>
+                <th>Saldo devedor</th>
+                <th>Patrimônio compra</th>
+              </tr>
+            </thead>
+            <tbody id="rentBuyRows"></tbody>
           </table>
         </div>
       </div>
@@ -329,7 +526,7 @@
         <aside class="result-panel">
           <div class="metric primary">
             <span>Economia estimada</span>
-            <strong id="amortizationSavings">R$ 0,00</strong>
+            <strong id="amortizationSavings" role="status" aria-live="polite">R$ 0,00</strong>
           </div>
           <div class="metric-list">
             <div><span>Total sem amortizar</span><strong id="baseAmortizationTotal">R$ 0,00</strong></div>
@@ -345,6 +542,9 @@
             <div class="investment-result hidden"><span>Ganho estimado do investimento</span><strong id="investmentDifferenceProfit">R$ 0,00</strong></div>
           </div>
         </aside>
+        <div class="controls-row">
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+        </div>
       </form>
 
       <div class="schedule-panel">
@@ -391,6 +591,13 @@
       </div>
     </section>
   </main>
+
+  <footer class="site-footer" style="width:min(1180px,calc(100% - 32px));margin:28px auto 56px;color:var(--muted);font-size:0.9rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+      <div>© 2026 Simulador de Financiamentos e Investimentos — Desenvolvido por João V. Fonseca</div>
+      <div><a href="https://github.com/joaovifonseca/simulador-investimentos-financiamentos" target="_blank" rel="noreferrer" class="source-link">Repositório</a></div>
+    </div>
+  </footer>
 
   <script src="page.js"></script>
 </body>
