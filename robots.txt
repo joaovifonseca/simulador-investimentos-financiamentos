@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap do site publicado
+Sitemap: https://joaovifonseca.github.io/simulador-investimentos-financiamentos/sitemap.xml
