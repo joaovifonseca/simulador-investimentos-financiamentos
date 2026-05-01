@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investimentos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="page.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-text">
+          <p class="eyebrow">Simulação isolada</p>
+          <h1>Investimentos</h1>
+          <p class="tagline">Renda fixa, IR e IOF em uma página separada.</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a class="source-link" href="index.html">Voltar para o app completo</a>
+      </div>
+    </header>
+
+    <section class="tab-view active">
+      <form class="calculator" id="investment-form">
+        <div class="form-panel">
+          <div class="section-title">
+            <h2>Investimento</h2>
+            <p>Informe o prazo para aplicar IR e IOF automaticamente.</p>
+          </div>
+          <div class="field-grid">
+            <label>
+              Valor inicial
+              <span class="money-input"><span>R$</span><input type="number" id="initialAmount" min="0" step="100" inputmode="decimal" placeholder="Ex: 10000" value="10000"></span>
+            </label>
+            <label>
+              Aporte mensal
+              <span class="money-input"><span>R$</span><input type="number" id="monthlyContribution" min="0" step="50" inputmode="decimal" placeholder="Ex: 500" value="500"></span>
+            </label>
+            <label>
+              Rentabilidade anual (%)
+              <input type="number" id="annualReturn" step="0.01" inputmode="decimal" placeholder="Ex: 11.25" value="11.25">
+            </label>
+            <label>
+              Tipo de aplicacao
+              <select id="investmentType">
+                <option value="taxable">Renda fixa tributavel</option>
+                <option value="exempt">LCI/LCA/CRI/CRA ou poupanca</option>
+              </select>
+            </label>
+            <label>
+              Prazo
+              <input type="number" id="investmentTerm" min="1" step="1" inputmode="numeric" placeholder="Ex: 24" value="24">
+            </label>
+            <label>
+              Unidade do prazo
+              <select id="investmentTermUnit">
+                <option value="months">Meses</option>
+                <option value="years">Anos</option>
+                <option value="days">Dias</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <aside class="result-panel">
+          <div class="metric primary">
+            <span>Valor liquido final</span>
+            <strong id="investmentNetValue" role="status" aria-live="polite">R$ 0,00</strong>
+          </div>
+          <div class="metric-list">
+            <div><span>Total investido</span><strong id="investmentDeposited">R$ 0,00</strong></div>
+            <div><span>Rendimento bruto</span><strong id="investmentGrossProfit">R$ 0,00</strong></div>
+            <div><span>IR estimado</span><strong id="investmentIncomeTax">R$ 0,00</strong></div>
+            <div><span>IOF estimado</span><strong id="investmentIof">R$ 0,00</strong></div>
+            <div><span>Aliquota aplicada</span><strong id="investmentTaxRate">0%</strong></div>
+          </div>
+        </aside>
+        <div class="controls-row">
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+        </div>
+      </form>
+
+      <div class="schedule-panel">
+        <div class="section-title compact">
+          <h2>Evolucao do investimento</h2>
+          <p>Projecao mensal com aportes, rendimento bruto e valor liquido estimado.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mes</th>
+                <th>Total investido</th>
+                <th>Saldo bruto</th>
+                <th>Impostos</th>
+                <th>Saldo liquido</th>
+              </tr>
+            </thead>
+            <tbody id="investmentRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="simulator-utils.js"></script>
+  <script src="investimentos.js"></script>
+</body>
+</html>

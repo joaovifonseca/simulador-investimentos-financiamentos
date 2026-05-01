@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Financiamento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="page.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-text">
+          <p class="eyebrow">Simulação isolada</p>
+          <h1>Financiamento</h1>
+          <p class="tagline">SAC e PRICE em uma página dedicada.</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a class="source-link" href="index.html">Voltar para o app completo</a>
+      </div>
+    </header>
+
+    <section class="tab-view active" id="mortgage">
+      <form class="calculator" id="mortgage-form">
+        <div class="form-panel">
+          <div class="section-title">
+            <h2>Financiamento imobiliario</h2>
+            <p>Compare SAC e PRICE ou escolha um sistema principal para acompanhar o resultado.</p>
+          </div>
+          <div class="field-grid">
+            <label>
+              Valor do imovel
+              <div class="range-field">
+                <input type="range" id="propertyValueRange" min="50000" max="3000000" step="10000" value="500000">
+                <span class="money-input"><span>R$</span><input type="number" id="propertyValue" min="0" step="1000" inputmode="decimal" placeholder="Ex: 500000" value="500000"></span>
+              </div>
+            </label>
+            <label>
+              Entrada (% do imóvel)
+              <div class="range-field">
+                <input type="range" id="downPaymentPercentRange" min="20" max="100" step="1" value="20">
+                <span class="money-input"><span>%</span><input type="number" id="downPaymentPercent" min="20" max="100" step="1" inputmode="decimal" placeholder="Ex: 20" value="20"></span>
+              </div>
+            </label>
+            <label>
+              Juros anual (%)
+              <input type="number" id="mortgageAnnualRate" min="0" step="0.01" inputmode="decimal" placeholder="Ex: 10.5" value="10.5">
+            </label>
+            <label>
+              Prazo (meses)
+              <input type="number" id="mortgageTerm" min="1" step="1" inputmode="numeric" placeholder="Ex: 360" value="360">
+            </label>
+            <label>
+              Sistema de amortizacao
+              <select id="mortgageSystem">
+                <option value="compare">Comparar SAC e PRICE</option>
+                <option value="sac">SAC</option>
+                <option value="price">PRICE</option>
+              </select>
+            </label>
+            <label>
+              Seguro mensal
+              <span class="money-input"><span>R$</span><input type="number" id="monthlyInsurance" min="0" step="10" inputmode="decimal" placeholder="Ex: 180" value="180"></span>
+            </label>
+            <label>
+              Taxa administrativa mensal
+              <span class="money-input"><span>R$</span><input type="number" id="monthlyAdminFee" min="0" step="5" inputmode="decimal" placeholder="Ex: 25" value="25"></span>
+            </label>
+            <label>
+              Taxas iniciais do banco
+              <span class="money-input"><span>R$</span><input type="number" id="upfrontBankFees" min="0" step="100" inputmode="decimal" placeholder="Ex: 3500" value="3500"></span>
+            </label>
+          </div>
+        </div>
+
+        <aside class="result-panel">
+          <div class="comparison">
+            <article class="comparison-card" id="sacCard">
+              <span>SAC</span>
+              <strong id="sacTotal" role="status" aria-live="polite">R$ 0,00</strong>
+              <small id="sacSummary">0 parcelas</small>
+            </article>
+            <article class="comparison-card" id="priceCard">
+              <span>PRICE</span>
+              <strong id="priceTotal" role="status" aria-live="polite">R$ 0,00</strong>
+              <small id="priceSummary">0 parcelas</small>
+            </article>
+          </div>
+          <div class="metric-list">
+            <div><span>Valor financiado</span><strong id="financedAmount">R$ 0,00</strong></div>
+            <div><span>Entrada</span><strong id="downPaymentPercentDisplay">20%</strong></div>
+            <div><span>Valor de entrada</span><strong id="downPaymentAmount">R$ 0,00</strong></div>
+            <div><span>Sistema escolhido</span><strong id="mortgageSelectedSystem">Comparar</strong></div>
+            <div><span>Total do sistema</span><strong id="mortgageSelectedTotal">R$ 0,00</strong></div>
+            <div><span>Primeira parcela</span><strong id="mortgageSelectedFirstPayment">R$ 0,00</strong></div>
+            <div><span>Primeira SAC</span><strong id="sacFirstPayment">R$ 0,00</strong></div>
+            <div><span>Parcela PRICE</span><strong id="priceFirstPayment">R$ 0,00</strong></div>
+            <div><span>Encargos mensais</span><strong id="monthlyBankCharges">R$ 0,00</strong></div>
+            <div><span>Taxas iniciais</span><strong id="upfrontFeesResult">R$ 0,00</strong></div>
+          </div>
+        </aside>
+        <div class="controls-row">
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+        </div>
+      </form>
+
+      <div class="schedule-panel">
+        <div class="section-title compact">
+          <h2>Primeiras parcelas</h2>
+          <p>Parcelas incluem seguro mensal e tarifa administrativa; saldos nao incluem correcao monetaria.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th id="scheduleColMonth">Mes</th>
+                <th id="scheduleColPayment1">SAC parcela</th>
+                <th id="scheduleColInterest1">SAC juros</th>
+                <th id="scheduleColBalance1">SAC saldo</th>
+                <th id="scheduleColPayment2">PRICE parcela</th>
+                <th id="scheduleColInterest2">PRICE juros</th>
+                <th id="scheduleColBalance2">PRICE saldo</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="simulator-utils.js"></script>
+  <script src="financiamento.js"></script>
+</body>
+</html>

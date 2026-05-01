@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amortização</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="page.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-text">
+          <p class="eyebrow">Simulação isolada</p>
+          <h1>Amortização</h1>
+          <p class="tagline">Antecipação de parcelas em uma página dedicada.</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a class="source-link" href="index.html">Voltar para o app completo</a>
+      </div>
+    </header>
+
+    <section class="tab-view active" id="amortization">
+      <form class="calculator" id="amortization-form">
+        <div class="form-panel">
+          <div class="section-title">
+            <h2>Amortizacao</h2>
+            <p>Simule antecipacoes escolhendo se quer reduzir prazo ou diminuir parcelas.</p>
+          </div>
+          <div class="field-grid">
+            <label>
+              Saldo financiado
+              <span class="money-input"><span>R$</span><input type="number" id="amortizationPrincipal" min="0" step="1000" inputmode="decimal" placeholder="Ex: 400000" value="400000"></span>
+            </label>
+            <label>
+              Sistema
+              <select id="amortizationMethod">
+                <option value="sac">SAC</option>
+                <option value="price">PRICE</option>
+              </select>
+            </label>
+            <label>
+              Juros anual (%)
+              <input type="number" id="amortizationAnnualRate" min="0" step="0.01" inputmode="decimal" placeholder="Ex: 10.5" value="10.5">
+            </label>
+            <label>
+              Prazo restante (meses)
+              <input type="number" id="amortizationTerm" min="1" step="1" inputmode="numeric" placeholder="Ex: 300" value="300">
+            </label>
+            <label>
+              Tipo de amortizacao
+              <select id="amortizationType">
+                <option value="monthly">Mensal recorrente</option>
+                <option value="oneTime">Avulsa unica</option>
+              </select>
+            </label>
+            <label>
+              Objetivo
+              <select id="amortizationGoal">
+                <option value="term">Reduzir prazo</option>
+                <option value="payment">Reduzir valor da parcela</option>
+              </select>
+            </label>
+            <label class="amortization-option" data-amortization-group="monthly">
+              Amortizacao extra mensal
+              <span class="money-input"><span>R$</span><input type="number" id="monthlyExtraAmortization" min="0" step="100" inputmode="decimal" placeholder="Ex: 1000" value="1000"></span>
+            </label>
+            <label class="amortization-option" data-amortization-group="monthly">
+              Comecar no mes
+              <input type="number" id="extraStartMonth" min="1" step="1" inputmode="numeric" placeholder="Ex: 1" value="1">
+            </label>
+            <label class="amortization-option hidden" data-amortization-group="oneTime">
+              Amortizacao avulsa
+              <span class="money-input"><span>R$</span><input type="number" id="oneTimeAmortization" min="0" step="100" inputmode="decimal" placeholder="Ex: 20000" value="20000"></span>
+            </label>
+            <label class="amortization-option hidden" data-amortization-group="oneTime">
+              Mes da amortizacao avulsa
+              <input type="number" id="oneTimeMonth" min="1" step="1" inputmode="numeric" placeholder="Ex: 12" value="12">
+            </label>
+            <label class="checkbox-field payment-goal-option hidden">
+              <span>
+                <input type="checkbox" id="investPaymentDifference">
+                Investiria o restante da parcela?
+              </span>
+            </label>
+            <label class="investment-option payment-goal-option hidden">
+              Taxa de investimento (%)
+              <input type="number" id="amortizationInvestmentRate" min="0" step="0.01" inputmode="decimal" placeholder="Ex: 11.25">
+            </label>
+          </div>
+        </div>
+
+        <aside class="result-panel">
+          <div class="metric primary">
+            <span>Economia estimada</span>
+            <strong id="amortizationSavings" role="status" aria-live="polite">R$ 0,00</strong>
+          </div>
+          <div class="metric-list">
+            <div><span>Total sem amortizar</span><strong id="baseAmortizationTotal">R$ 0,00</strong></div>
+            <div><span>Total com amortizacao</span><strong id="extraAmortizationTotal">R$ 0,00</strong></div>
+            <div><span>Prazo original</span><strong id="baseAmortizationMonths">0 meses</strong></div>
+            <div><span>Novo prazo</span><strong id="extraAmortizationMonths">0 meses</strong></div>
+            <div><span>Meses reduzidos</span><strong id="monthsSaved">0</strong></div>
+            <div><span>Parcela base comparada</span><strong id="baseFirstPayment">R$ 0,00</strong></div>
+            <div><span>Parcela simulada comparada</span><strong id="extraFirstPayment">R$ 0,00</strong></div>
+            <div class="highlight-row"><span>Reducao da parcela base</span><strong id="paymentReduction">R$ 0,00</strong></div>
+            <div class="investment-result hidden"><span>Taxa usada no investimento</span><strong id="investmentDifferenceRate">0% a.a.</strong></div>
+            <div class="highlight-row investment-result hidden"><span>Investindo a diferenca</span><strong id="investedPaymentDifference">R$ 0,00</strong></div>
+            <div class="investment-result hidden"><span>Ganho estimado do investimento</span><strong id="investmentDifferenceProfit">R$ 0,00</strong></div>
+          </div>
+        </aside>
+        <div class="controls-row">
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+        </div>
+      </form>
+
+      <div class="schedule-panel">
+        <div class="section-title compact">
+          <h2>Efeito nas parcelas</h2>
+          <p>A tabela mostra os primeiros meses comparando o contrato base com o cenario amortizado.</p>
+        </div>
+        <nav class="sub-tabs" aria-label="Detalhes da amortizacao">
+          <button class="sub-tab-button active" type="button" data-sub-tab="amortization-table">Parcelas</button>
+          <button class="sub-tab-button investment-sub-tab hidden" type="button" data-sub-tab="amortization-investment-table">Investimento da diferenca</button>
+        </nav>
+        <div class="sub-tab-view active" id="amortization-table">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mes</th>
+                  <th>Base parcela</th>
+                  <th>Base saldo</th>
+                  <th>Com amortizacao</th>
+                  <th>Novo saldo</th>
+                </tr>
+              </thead>
+              <tbody id="amortizationRows"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="sub-tab-view" id="amortization-investment-table">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mes</th>
+                  <th>Diferenca investida</th>
+                  <th>Total aportado</th>
+                  <th>Saldo investido</th>
+                  <th>Ganho estimado</th>
+                </tr>
+              </thead>
+              <tbody id="amortizationInvestmentRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="simulator-utils.js"></script>
+  <script src="amortizacao.js"></script>
+</body>
+</html>

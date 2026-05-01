@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aluguel x Financiamento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="page.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-text">
+          <p class="eyebrow">Simulação isolada</p>
+          <h1>Aluguel x financiamento</h1>
+          <p class="tagline">Compare cenários com dados próprios nesta página.</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a class="source-link" href="index.html">Voltar para o app completo</a>
+      </div>
+    </header>
+
+    <section class="tab-view active" id="rent-buy">
+      <form class="calculator" id="rent-buy-form">
+        <div class="form-panel">
+          <div class="section-title">
+            <h2>Aluguel x financiamento</h2>
+            <p>Comparação independente, com os próprios parâmetros de compra e aluguel.</p>
+          </div>
+
+          <div class="field-grid">
+            <label>
+              Valor do imóvel
+              <div class="range-field">
+                <input type="range" id="rentBuyPropertyValueRange" min="50000" max="3000000" step="10000" value="500000">
+                <span class="money-input"><span>R$</span><input type="number" id="rentBuyPropertyValue" min="0" step="1000" inputmode="decimal" placeholder="Ex: 500000" value="500000"></span>
+              </div>
+            </label>
+            <label>
+              Entrada (% do imóvel)
+              <div class="range-field">
+                <input type="range" id="rentBuyDownPaymentPercentRange" min="20" max="100" step="1" value="20">
+                <span class="money-input"><span>%</span><input type="number" id="rentBuyDownPaymentPercent" min="20" max="100" step="1" inputmode="decimal" placeholder="Ex: 20" value="20"></span>
+              </div>
+            </label>
+            <label>
+              Juros anual (% do financiamento)
+              <input type="number" id="rentBuyMortgageAnnualRate" min="0" step="0.01" inputmode="decimal" placeholder="Ex: 10.5" value="10.5">
+            </label>
+            <label>
+              Prazo do financiamento (meses)
+              <input type="number" id="rentBuyMortgageTerm" min="1" step="1" inputmode="numeric" placeholder="Ex: 360" value="360">
+            </label>
+            <label>
+              Sistema de amortização
+              <select id="rentBuyMortgageSystem">
+                <option value="sac">SAC</option>
+                <option value="price">PRICE</option>
+              </select>
+            </label>
+            <label>
+              Opção de amortização
+              <select id="rentBuyAmortizationType">
+                <option value="none">Sem amortização</option>
+                <option value="monthly">Amortização mensal</option>
+                <option value="oneTime">Amortização avulsa</option>
+              </select>
+            </label>
+            <label class="rentbuy-amortization-option hidden" data-rentbuy-amortization-group="monthly">
+              Amortização extra mensal
+              <span class="money-input"><span>R$</span><input type="number" id="rentBuyMonthlyExtraAmortization" min="0" step="100" inputmode="decimal" placeholder="Ex: 1000" value="1000"></span>
+            </label>
+            <label class="rentbuy-amortization-option hidden" data-rentbuy-amortization-group="monthly">
+              Começar no mês
+              <input type="number" id="rentBuyExtraStartMonth" min="1" step="1" inputmode="numeric" placeholder="Ex: 1" value="1">
+            </label>
+            <label class="rentbuy-amortization-option hidden" data-rentbuy-amortization-group="oneTime">
+              Amortização avulsa
+              <span class="money-input"><span>R$</span><input type="number" id="rentBuyOneTimeAmortization" min="0" step="100" inputmode="decimal" placeholder="Ex: 20000" value="20000"></span>
+            </label>
+            <label class="rentbuy-amortization-option hidden" data-rentbuy-amortization-group="oneTime">
+              Mês da amortização avulsa
+              <input type="number" id="rentBuyOneTimeMonth" min="1" step="1" inputmode="numeric" placeholder="Ex: 12" value="12">
+            </label>
+            <label>
+              Seguro mensal
+              <span class="money-input"><span>R$</span><input type="number" id="rentBuyMonthlyInsurance" min="0" step="10" inputmode="decimal" placeholder="Ex: 180" value="180"></span>
+            </label>
+            <label>
+              Taxa administrativa mensal
+              <span class="money-input"><span>R$</span><input type="number" id="rentBuyMonthlyAdminFee" min="0" step="5" inputmode="decimal" placeholder="Ex: 25" value="25"></span>
+            </label>
+            <label>
+              Taxas iniciais
+              <span class="money-input"><span>R$</span><input type="number" id="rentBuyUpfrontBankFees" min="0" step="100" inputmode="decimal" placeholder="Ex: 3500" value="3500"></span>
+            </label>
+            <label>
+              Aluguel mensal inicial
+              <span class="money-input"><span>R$</span><input type="number" id="rentMonthly" min="0" step="50" inputmode="decimal" placeholder="Ex: 2500" value="2500"></span>
+            </label>
+            <label>
+              Reajuste anual do aluguel (%)
+              <input type="number" id="rentAnnualIncrease" min="0" step="0.1" inputmode="decimal" placeholder="Ex: 5" value="5">
+            </label>
+            <label>
+              Valorização anual do imóvel (%)
+              <input type="number" id="propertyAppreciationAnnual" min="0" step="0.1" inputmode="decimal" placeholder="Ex: 8" value="8">
+            </label>
+            <label>
+              Rendimento anual do investimento (%)
+              <input type="number" id="rentBuyInvestmentAnnualRate" min="0" step="0.1" inputmode="decimal" placeholder="Ex: 10.5" value="10.5">
+            </label>
+          </div>
+        </div>
+
+        <aside class="result-panel">
+          <div class="metric primary">
+            <span>Melhor cenário</span>
+            <strong id="rentBuyWinner" role="status" aria-live="polite">—</strong>
+          </div>
+          <div class="metric-list">
+            <div><span>Resultado compra</span><strong id="rentBuyPurchaseNet">R$ 0,00</strong></div>
+            <div><span>Resultado aluguel</span><strong id="rentBuyRentNet">R$ 0,00</strong></div>
+            <div><span>Custo total compra</span><strong id="rentBuyPurchaseCost">R$ 0,00</strong></div>
+            <div><span>Custo total aluguel</span><strong id="rentBuyRentCost">R$ 0,00</strong></div>
+            <div><span>Patrimônio final do imóvel</span><strong id="rentBuyPropertyValue">R$ 0,00</strong></div>
+            <div><span>Sistema usado</span><strong id="rentBuySystemUsed">—</strong></div>
+            <div><span>Parcela inicial financiamento</span><strong id="rentBuyFirstPayment">R$ 0,00</strong></div>
+            <div><span>Aluguel inicial</span><strong id="rentBuyFirstRent">R$ 0,00</strong></div>
+          </div>
+        </aside>
+        <div class="controls-row">
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+        </div>
+      </form>
+
+      <div class="schedule-panel">
+        <div class="section-title compact">
+          <h2>Evolução aluguel x financiamento</h2>
+          <p>Comparação mensal entre o aluguel pago e o custo acumulado da compra, com patrimônio estimado do imóvel.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mes</th>
+                <th>Aluguel</th>
+                <th>Aluguel acumulado</th>
+                <th>Financiamento</th>
+                <th>Compra acumulada</th>
+                <th>Saldo devedor</th>
+                <th>Patrimônio compra</th>
+              </tr>
+            </thead>
+            <tbody id="rentBuyRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="simulator-utils.js"></script>
+  <script src="aluguel-financiamento.js"></script>
+</body>
+</html>
